@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 24px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 Voice Calculator</h1>
+  <button onclick="startListening()">Start Listening</button>
+  <div id="result"></div>
+
+  <script>
+    const operations = {
+      "plus": "+",
+      "add": "+",
+      "minus": "-",
+      "subtract": "-",
+      "times": "*",
+      "multiply": "*",
+      "multiplied by": "*",
+      "into": "*",
+      "divided by": "/",
+      "divide": "/"
+    };
+
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const speech = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("result").innerText = "You said: " + speech;
+        calculate(speech);
+      };
+
+      recognition.onerror = function(event) {
+        document.getElementById("result").innerText = "Error: " + event.error;
+      };
+    }
+
+    function calculate(speech) {
+      let modifiedSpeech = speech;
+
+      const sortedOps = Object.keys(operations).sort((a, b) => b.length - a.length);
+
+      for (const word of sortedOps) {
+        if (speech.includes(word)) {
+          modifiedSpeech = speech.replace(word, operations[word]);
+          break;
+        }
+      }
+
+      try {
+        const result = eval(modifiedSpeech);
+        if (!isNaN(result)) {
+          document.getElementById("result").innerText += `\nAnswer: ${result}`;
+        } else {
+          document.getElementById("result").innerText += `\nCould not calculate.`;
+        }
+      } catch {
+        document.getElementById("result").innerText += `\nInvalid expression.`;
+      }
+    }
+  </script>
+</body>
+</html>
